@@ -1,0 +1,27 @@
+import "google/protobuf/empty.proto";
+
+syntax = "proto3";
+
+package ToDoService;
+
+message ToDoItem {
+  string title = 1;
+  string author = 2;
+  bool isDone = 3;
+}
+
+message ToDoList {
+  repeated ToDoItem ToDoList = 1;
+}
+
+message GetQueryOptions {
+  string author = 1;
+}
+
+service ToDoService {
+  rpc CreateToDo (ToDoItem) returns (ToDoList);
+  rpc CreateMultiToDo (stream ToDoItem) returns (stream ToDoItem);
+  rpc GetToDoListByAuthor (GetQueryOptions) returns (stream ToDoItem);
+  rpc GetToDoListByMultiAuthors (stream GetQueryOptions) returns (ToDoList);
+  rpc ListToDoItems (google.protobuf.Empty) returns (stream ToDoItem);
+}
