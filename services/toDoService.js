@@ -1,22 +1,23 @@
-const grpc = require("grpc");
+const grpc = require('grpc');
 
 let todoList = [
-  { title: "Hello1", author: "Adam", isDone: true },
-  { title: "Hello2", author: "Ben", isDone: null },
-  { title: "Hello3", author: "Ben", isDone: true },
-  { title: "world1", author: "Adam", isDone: null },
-  { title: "world2", author: "Cathy", isDone: true },
-  { title: "world3", author: "Ben", isDone: null },
+  { title: 'Hello1', author: 'Adam', isDone: true },
+  { title: 'Hello2', author: 'Ben', isDone: null },
+  { title: 'Hello3', author: 'Ben', isDone: true },
+  { title: 'world1', author: 'Adam', isDone: null },
+  { title: 'world2', author: 'Cathy', isDone: true },
+  { title: 'world3', author: 'Ben', isDone: null },
 ];
 
+// Unary RPC
 function createToDo(call, callback) {
-  console.log("=========start createToDo=========");
+  console.log('=========start createToDo=========');
 
-  const clientToken = call.metadata.get("token");
-  if (clientToken[0] !== "Secret") {
+  const clientToken = call.metadata.get('token');
+  if (clientToken[0] !== 'Secret') {
     return callback({
       error: grpc.status.PERMISSION_DENIED,
-      message: "No token",
+      message: 'No token',
     });
   }
   todoList.push(call.request);
@@ -24,7 +25,7 @@ function createToDo(call, callback) {
   if (todoList.length > 10) {
     return callback({
       error: grpc.status.OUT_OF_RANGE,
-      message: "too many ToDoItem",
+      message: 'too many ToDoItem',
     });
   }
 
@@ -32,13 +33,14 @@ function createToDo(call, callback) {
     ToDoList: todoList,
   });
 
-  console.log("=========end createToDo=========");
+  console.log('=========end createToDo=========');
 }
 
+// Bidirectional streaming RPCs
 async function createMultiToDo(call, callback) {
-  console.log("=========start createMultiToDo=========");
+  console.log('=========start createMultiToDo=========');
 
-  call.on("data", (data) => {
+  call.on('data', (data) => {
     todoList.push(data);
 
     // if (todoList.length > 10) {
@@ -46,15 +48,16 @@ async function createMultiToDo(call, callback) {
     // }
   });
 
-  call.on("end", () => {
+  call.on('end', () => {
     listToDoItems(call);
 
-    console.log("=========end createMultiToDo=========");
+    console.log('=========end createMultiToDo=========');
   });
 }
 
+// Server streaming RPCs
 function getToDoListByAuthor(call) {
-  console.log("=========start getToDoListByAuthor=========");
+  console.log('=========start getToDoListByAuthor=========');
 
   const author = call.request.author;
 
@@ -69,36 +72,38 @@ function getToDoListByAuthor(call) {
     }
 
     if (isAny === false) {
-      return call.emit("error", grpc.status.NOT_FOUND);
+      return call.emit('error', grpc.status.NOT_FOUND);
     }
 
     call.end();
-    console.log("=========end getToDoListByAuthor=========");
+    console.log('=========end getToDoListByAuthor=========');
   }
 
   main();
 }
 
+// Client streaming RPCs
 async function getToDoListByMultiAuthors(call, callback) {
-  console.log("=========start getToDoListByMultiAuthors=========");
+  console.log('=========start getToDoListByMultiAuthors=========');
 
   let res = [];
-  call.on("data", (data) => {
+  call.on('data', (data) => {
     const items = todoList.filter((i) => i.author === data.author);
     res.push(...items);
   });
 
-  call.on("end", () => {
+  call.on('end', () => {
     callback(null, {
       ToDoList: res,
     });
 
-    console.log("=========end getToDoListByMultiAuthors=========");
+    console.log('=========end getToDoListByMultiAuthors=========');
   });
 }
 
+// Server streaming RPCs
 async function listToDoItems(call) {
-  console.log("=========start listToDoItems=========");
+  console.log('=========start listToDoItems=========');
 
   for (const todoItem of todoList) {
     call.write(todoItem);
@@ -107,7 +112,7 @@ async function listToDoItems(call) {
 
   call.end();
 
-  console.log("=========end listToDoItems=========");
+  console.log('=========end listToDoItems=========');
 }
 
 async function wait(sec) {

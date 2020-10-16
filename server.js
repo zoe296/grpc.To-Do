@@ -1,9 +1,9 @@
-const path = require("path");
-const grpc = require("grpc");
-const protoLoader = require("@grpc/proto-loader");
-const toDoService = require("./services/toDoService");
+const path = require('path');
+const grpc = require('grpc');
+const protoLoader = require('@grpc/proto-loader');
+const toDoService = require('./services/toDoService');
 
-const PROTO_PATH = path.join(__dirname, "./protos/todo.proto");
+const PROTO_PATH = path.join(__dirname, './protos/todo.proto');
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true, // Preserve field names. The default is to change them to camel case.
   longs: String, // The type to use to represent long values. Defaults to a Long object type.
@@ -18,10 +18,10 @@ const toDoProto = grpc.loadPackageDefinition(packageDefinition).ToDoService;
 async function main() {
   const server = new grpc.Server();
   server.addService(toDoProto.ToDoService.service, toDoService);
-  server.bind("0.0.0.0:50051", grpc.ServerCredentials.createInsecure());
+  server.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
   server.start();
 
-  console.log("=========start=========");
+  console.log('=========start=========');
 }
 
 main();
